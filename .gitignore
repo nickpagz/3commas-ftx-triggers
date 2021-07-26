@@ -1,0 +1,12 @@
+__pycache__/
+old_versions/
+.DS_Store
+Py3ctest.py
+3ctrigger_log.txt
+botid_list.txt
+config.py
+ignored_longs.txt
+ignored_shorts.txt
+lbotid_list.txt
+sbotid_list.txt
+
