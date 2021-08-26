@@ -1,0 +1,13 @@
+[Unit]
+Description=3Commas FTX Daemon
+After=network.target
+
+[Service]
+# Set WorkingDirectory and ExecStart to your file paths accordingly
+# NOTE: %h will be resolved to /home/<username>
+WorkingDirectory=/home/ron/development/3commas-ftx-triggers
+ExecStart=/home/ron/development/3commas-ftx-triggers/.env/bin/python /home/ron/development/3commas-ftx-triggers/Py3c_triggers.py
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
