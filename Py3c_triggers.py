@@ -59,15 +59,14 @@ def get_markets():
 def get_price(markets):
     perps = {}
     for key in markets:
-        if "PERP" in key and not any(perp in key for perp in config.PAIRS_BLACKLIST):
+        if "PERP" in markets[key]['id'] and not any(perp in markets[key]['id'] for perp in config.PAIRS_BLACKLIST):
             if "last" in markets[key]["info"]:
-                perps[key] = markets[key]["info"]["last"]
+                perps[markets[key]['id']] = markets[key]["info"]["last"]
     return perps
 
 
 def get_tradeable_balance():
     account_balances = ftx.fetch_balance()
-    print(f'Account balances: {account_balances}')
     balance = account_balances["total"]["USD"]
     print(f'Balance: {balance}')
     return balance
@@ -225,9 +224,9 @@ def load_bot_ids(filename):
 
 def get_max_bot_usage(balance):
     if config.MARTINGALE_VOLUME_COEFFICIENT == 1.0:
-        max_bot_usage = config.BASE_ORDER_VOLUME + (config.SAFETY_ORDER_VOLUME*config.MAX_SAFETY_ORERS)
+        max_bot_usage = config.BASE_ORDER_VOLUME + (config.SAFETY_ORDER_VOLUME*config.MAX_SAFETY_ORERS) / config.LEVERAGE_CUSTOM_VALUE
     else:
-        max_bot_usage = config.BASE_ORDER_VOLUME + (config.SAFETY_ORDER_VOLUME*(config.MARTINGALE_VOLUME_COEFFICIENT**config.MAX_SAFETY_ORERS - 1) / (config.MARTINGALE_VOLUME_COEFFICIENT - 1))
+        max_bot_usage = (config.BASE_ORDER_VOLUME + (config.SAFETY_ORDER_VOLUME*(config.MARTINGALE_VOLUME_COEFFICIENT**config.MAX_SAFETY_ORERS - 1) / (config.MARTINGALE_VOLUME_COEFFICIENT - 1))) / config.LEVERAGE_CUSTOM_VALUE
     return max_bot_usage
 
 def enable_bot(pair, bot_id):
@@ -260,7 +259,7 @@ longbots_file = Path("lbotid_list.txt")
 shortbots_file = Path("sbotid_list.txt")
 
 if not longbots_file.is_file() or not shortbots_file.is_file():
-    print("No bot ID lists were found. Create bots and ID list before continuing.")
+    print("No (or only one) bot ID lists were found. Create bots and ID list before continuing.")
     print("Bye!")
     sys.exit()
 

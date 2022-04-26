@@ -32,8 +32,8 @@ def build_tc_pairs_list(pairs):
     ftx_pairs = {}
     tc_pairs = {}
     for key in markets:
-        if "PERP" in key and not any(perp in key for perp in config.PAIRS_BLACKLIST):
-            ftx_pairs[key] = ""
+        if "PERP" in markets[key]['id'] and not any(perp in markets[key]['id'] for perp in config.PAIRS_BLACKLIST):
+            ftx_pairs[markets[key]['id']] = ""
     for key in ftx_pairs:
         tc_pairs["USD_"+key] = ""
     return tc_pairs
@@ -41,10 +41,11 @@ def build_tc_pairs_list(pairs):
 def get_min_order_price(markets):
     limits = {}
     for key in markets:
-        if "PERP" in key and not any(perp in key for perp in config.PAIRS_BLACKLIST):
+        if "PERP" in markets[key]["id"] and not any(perp in markets[key]["id"] for perp in config.PAIRS_BLACKLIST):
             if "minProvideSize" in markets[key]["info"]:
-                limits["USD_"+key] = math.ceil(float(markets[key]["info"]["minProvideSize"]) * float(markets[key]["info"]["price"]))
+                limits["USD_"+markets[key]["id"]] = math.ceil(float(markets[key]["info"]["minProvideSize"]) * float(markets[key]["info"]["price"]))
     return limits
+
 
 def generate_long_bots(pairs, minprice):
     bot_list = {}
@@ -167,7 +168,7 @@ if longbots_file.is_file() or shortbots_file.is_file():
     else:
         print("over-writing in progress...")
         if longbots_file.is_file(): os.remove("lbotid_list.txt")
-        if longbots_file.is_file(): os.remove("sbotid_list.txt")
+        if shortbots_file.is_file(): os.remove("sbotid_list.txt")
         build_bots()
 
 else:
