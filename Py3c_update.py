@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import time
 import config
 from py3cw.request import Py3CW
