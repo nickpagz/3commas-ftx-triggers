@@ -40,7 +40,8 @@ ftx = ccxt.ftx({
 
 
 def get_markets():
-    trycnt = 3
+    trycnt = 4
+    sleep_time = 5
     while trycnt > 0:
         try:
             all_markets = ftx.load_markets(True)
@@ -51,7 +52,8 @@ def get_markets():
             f.write(f'FTX cononnection error at {strftime("%Y-%m-%d %H:%M:%S", gmtime())} UTC\n')
             f.close()
             trycnt -= 1
-            time.sleep(3)
+            time.sleep(sleep_time)
+            sleep_time = sleep_time * 3
         else:
             return all_markets
             
@@ -66,10 +68,24 @@ def get_price(markets):
 
 
 def get_tradeable_balance():
-    account_balances = ftx.fetch_balance()
-    balance = account_balances["total"]["USD"]
-    print(f'Balance: {balance}')
-    return balance
+    trycnt = 4
+    sleep_time = 5
+    while trycnt > 0:
+        try:
+            account_balances = ftx.fetch_balance()
+            balance = account_balances["total"]["USD"]
+            print(f'Balance: {balance}')
+            trycnt = 0
+        except Exception as e:
+            print("Connection error, trying again...")
+            f = open("3ctrigger_log.txt", "a")
+            f.write(f'FTX cononnection error at {strftime("%Y-%m-%d %H:%M:%S", gmtime())} UTC\n')
+            f.close()
+            trycnt -= 1
+            time.sleep(sleep_time)
+            sleep_time = sleep_time * 3
+        else:
+            return balance
 
 
 def change(old, new):
@@ -201,18 +217,31 @@ def close_deal(pair, side, long_bots, short_bots):
 
 def get_positions():
     open_positions = {}
-    all_positions = ftx.fetchPositions(None, {"showAvgPrice": True})
-    if 'info' in all_positions[0]:
-        for y in all_positions:
-            x=y['info']
-            future = (x["future"])
-            size = (x["size"])
-            side = (x["side"])
-            cost = (x["cost"])
-            recentAverageOpenPrice = (x["recentAverageOpenPrice"])
-            if size != '0.0':
-                open_positions[future] = size, side, cost, recentAverageOpenPrice
-    return open_positions
+    trycnt = 4
+    sleep_time = 5
+    while trycnt > 0:
+        try:
+            all_positions = ftx.fetchPositions(None, {"showAvgPrice": True})
+            if 'info' in all_positions[0]:
+                for y in all_positions:
+                    x=y['info']
+                    future = (x["future"])
+                    size = (x["size"])
+                    side = (x["side"])
+                    cost = (x["cost"])
+                    recentAverageOpenPrice = (x["recentAverageOpenPrice"])
+                    if size != '0.0':
+                        open_positions[future] = size, side, cost, recentAverageOpenPrice
+        except Exception as e:
+            print("Connection error, trying again...")
+            f = open("3ctrigger_log.txt", "a")
+            f.write(f'FTX cononnection error at {strftime("%Y-%m-%d %H:%M:%S", gmtime())} UTC\n')
+            f.close()
+            trycnt -= 1
+            time.sleep(sleep_time)
+            sleep_time = sleep_time * 3
+        else:
+            return open_positions
 
 
 def load_bot_ids(filename):
